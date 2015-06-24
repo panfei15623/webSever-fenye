@@ -1,0 +1,27 @@
+.btn-fenye{
+    padding: 5px 18px;
+    font-size: 13px;
+    border-style: none;
+}
+#num-div{
+    border: 1px solid #dcdcdc;
+    border-top-style: none;
+    margin-bottom: 10px;
+}
+.num-ul{
+    overflow: hidden;
+    /*height: 220px;*/
+    padding-top: 20px;
+}
+.num-ul li{
+    float: left;
+    width:100px;
+    text-align: center;
+    margin: 8px 0px;
+    list-style-type: none;
+}
+#btn-ul li{
+    float: left;
+    margin-left: 5px;
+    list-style-type: none;
+}

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>后台分页</title>
+    <link rel="stylesheet" href="css/fenye.css"/>
+    <script src="lib/jquery-1.11.1.min.js"></script>
+    <script src="lib/knockout-3.2.0.js"></script>
+</head>
+<body>
+    <div style="width: 960px;margin: 0 auto">
+        <h2 style="text-align: center">服务端分页</h2>
+        <div id="num-div">
+            <ul class="num-ul">
+                <!-- ko foreach:itemArr-->
+                <li class="num">
+                    <a data-bind="text:$data"></a>
+                </li>
+                <!-- /ko-->
+            </ul>
+            <div style="text-align: center;margin-bottom: 10px">
+                <ul id="btn-ul">
+                    <li>
+                        <button class="btn-fenye" data-bind="click:firstPage">首页</button>
+                    </li>
+                    <li>
+                        <button class="btn-fenye" data-bind="click:previous">上一页</button>
+                    </li>
+                    <!-- ko foreach:yemaArr-->
+                    <li>
+                        <button class="btn-fenye" data-bind="text:$data,click:$parent.yemaBtn" ></button>
+                    </li>
+                    <!-- /ko -->
+                    <li>
+                        <button class="btn-fenye" data-bind="click:next">下一页</button>
+                    </li>
+                    <li>
+                        <button class="btn-fenye" data-bind="click:lastPage">尾页</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        var viewModel = function(){
+            var self = this;
+            this.per_page_num = ko.observable(34);  //每页数据的条数
+            this.item_total_num = ko.observable();  //数据的总数目
+            this.page_total_num = ko.observable();  //总页数
+            this.yemaArr = ko.observableArray([]);  //存放页码的数组
+            this.itemArr = ko.observableArray([]);  //存放数据的数组
+            dataObj = {
+                    perPageNum: self.per_page_num(),
+                    yemaNum:1
+                };
+            //点击页码跳转
+            this.yemaBtn = function(yemaNum){
+                dataObj["yemaNum"] = yemaNum;
+                fenye(dataObj);
+            }
+
+            //跳到首页
+            this.firstPage = function(){
+                dataObj["yemaNum"] = 1;
+                fenye(dataObj);
+            }
+
+            //跳到尾页
+            this.lastPage = function(){
+                dataObj["yemaNum"] = self.page_total_num();
+                fenye(dataObj);
+            }
+
+            //上一页
+            this.previous = function(){
+                if(dataObj["yemaNum"] > 1){
+                    dataObj["yemaNum"] -= 1;
+                    fenye(dataObj);
+                }
+            }
+
+            //下一页
+            this.next = function(){
+                if(dataObj["yemaNum"] < self.page_total_num()){
+                    dataObj["yemaNum"] += 1;
+                    fenye(dataObj);
+                }
+            }
+        }
+        var myViewmodel = new viewModel();
+        ko.applyBindings(myViewmodel);
+
+        //ajax实现分页
+        function fenye(dataObj){
+            $.ajax({
+                url: "http://10.130.40.121:3000/fenye",
+                dataType: "jsonp",
+                data:dataObj,
+                success: function(data){
+                    myViewmodel.itemArr([]);
+                    myViewmodel.yemaArr([]);
+                    myViewmodel.item_total_num(data["itemTotal"][0]["count(*)"]);
+                    myViewmodel.page_total_num(Math.ceil(myViewmodel.item_total_num() / myViewmodel.per_page_num()));
+                    for(var i = 0;i < data["itemArr"].length;i++){
+                        myViewmodel.itemArr.push(data["itemArr"][i]["num"]);
+                    }
+                    for(var j = 1;j <= myViewmodel.page_total_num();j++){
+                        myViewmodel.yemaArr.push(j);
+                    }
+                }
+            })
+        }
+        fenye(dataObj);
+    </script>
+</body>
+</html>
